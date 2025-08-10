@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,29 +14,31 @@ import {
   ActivityIndicator,
   TextInput,
   Modal,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { LinearGradient } from 'expo-linear-gradient'
-import { useRouter, usePathname, useFocusEffect } from 'expo-router'
-import { usePersistedAuth } from './usePersistedAuth'
-import { useTheme } from './ThemeContext'
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter, usePathname, useFocusEffect } from 'expo-router';
+import { usePersistedAuth } from './usePersistedAuth';
+import { useTheme } from './ThemeContext';
+import { db } from './firebaseConfig';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
-const { width, height } = Dimensions.get('window')
+const { width, height } = Dimensions.get('window');
 
 
 const ParticleComponent: React.FC<{ theme: any; index: number }> = React.memo(({ theme, index }) => {
-  const translateY = useRef(new Animated.Value(0)).current
-  const scale = useRef(new Animated.Value(0.5)).current
-  const opacity = useRef(new Animated.Value(0)).current
+  const translateY = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.5)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
   
   const initialPosition = useRef({
     left: Math.random() * (width - 20),
     top: Math.random() * (height - 100),
     size: 4 + Math.random() * 8,
-  }).current
+  }).current;
 
   useEffect(() => {
-    const delay = Math.random() * 3000
+    const delay = Math.random() * 3000;
     const startAnimations = () => {
       Animated.loop(
         Animated.timing(translateY, {
@@ -45,7 +47,7 @@ const ParticleComponent: React.FC<{ theme: any; index: number }> = React.memo(({
           useNativeDriver: true,
           easing: Easing.sin,
         }),
-      ).start()
+      ).start();
       Animated.loop(
         Animated.sequence([
           Animated.timing(scale, {
@@ -61,7 +63,7 @@ const ParticleComponent: React.FC<{ theme: any; index: number }> = React.memo(({
             easing: Easing.quad,
           }),
         ]),
-      ).start()
+      ).start();
       Animated.loop(
         Animated.sequence([
           Animated.timing(opacity, {
@@ -75,14 +77,14 @@ const ParticleComponent: React.FC<{ theme: any; index: number }> = React.memo(({
             useNativeDriver: true,
           }),
         ]),
-      ).start()
-    }
-    const timer = setTimeout(startAnimations, delay)
-    return () => clearTimeout(timer)
-  }, [translateY, scale, opacity])
+      ).start();
+    };
+    const timer = setTimeout(startAnimations, delay);
+    return () => clearTimeout(timer);
+  }, [translateY, scale, opacity]);
 
-  const colors = [theme.accentA, theme.accentB, theme.accentC, theme.accentD]
-  const particleColor = colors[index % colors.length]
+  const colors = [theme.accentA, theme.accentB, theme.accentC, theme.accentD];
+  const particleColor = colors[index % colors.length];
 
   return (
     <Animated.View
@@ -102,8 +104,8 @@ const ParticleComponent: React.FC<{ theme: any; index: number }> = React.memo(({
         },
       ]}
     />
-  )
-})
+  );
+});
 
 const FloatingParticles: React.FC<{ theme: any }> = React.memo(({ theme }) => {
   return (
@@ -112,20 +114,20 @@ const FloatingParticles: React.FC<{ theme: any }> = React.memo(({ theme }) => {
         <ParticleComponent key={i} theme={theme} index={i} />
       ))}
     </View>
-  )
-})
+  );
+});
 
 interface TipCardProps {
-  title: string
-  description: string
-  color: string
-  onPress: () => void
-  delay?: number
+  title: string;
+  description: string;
+  color: string;
+  onPress: () => void;
+  delay?: number;
 }
 
 const TipCard: React.FC<TipCardProps> = React.memo(({ title, description, color, onPress, delay = 0 }) => {
-  const scaleAnim = useRef(new Animated.Value(0)).current
-  const [isPressed, setIsPressed] = useState(false)
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const [isPressed, setIsPressed] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -134,29 +136,29 @@ const TipCard: React.FC<TipCardProps> = React.memo(({ title, description, color,
         useNativeDriver: true,
         friction: 6,
         tension: 100,
-      }).start()
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [scaleAnim, delay])
+      }).start();
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [scaleAnim, delay]);
 
   const handlePressIn = () => {
-    setIsPressed(true)
-    Vibration.vibrate(20)
+    setIsPressed(true);
+    Vibration.vibrate(20);
     Animated.spring(scaleAnim, {
       toValue: 0.95,
       useNativeDriver: true,
       friction: 8,
-    }).start()
-  }
+    }).start();
+  };
 
   const handlePressOut = () => {
-    setIsPressed(false)
+    setIsPressed(false);
     Animated.spring(scaleAnim, {
       toValue: 1,
       useNativeDriver: true,
       friction: 8,
-    }).start()
-  }
+    }).start();
+  };
 
   return (
     <Animated.View
@@ -184,17 +186,17 @@ const TipCard: React.FC<TipCardProps> = React.memo(({ title, description, color,
         <Text style={styles.tipDescription}>{description}</Text>
       </Pressable>
     </Animated.View>
-  )
-})
+  );
+});
 
 interface RoleSwitcherProps {
-  role: 'Buyer' | 'Seller'
-  onToggle: () => void
-  theme: any
+  role: 'Buyer' | 'Seller';
+  onToggle: () => void;
+  theme: any;
 }
 
 const RoleSwitcher: React.FC<RoleSwitcherProps> = React.memo(({ role, onToggle, theme }) => {
-  const animValue = useRef(new Animated.Value(role === 'Buyer' ? 0 : 1)).current
+  const animValue = useRef(new Animated.Value(role === 'Buyer' ? 0 : 1)).current;
 
   useEffect(() => {
     Animated.timing(animValue, {
@@ -202,18 +204,18 @@ const RoleSwitcher: React.FC<RoleSwitcherProps> = React.memo(({ role, onToggle, 
       duration: 300,
       useNativeDriver: false,
       easing: Easing.out(Easing.quad),
-    }).start()
-  }, [role, animValue])
+    }).start();
+  }, [role, animValue]);
 
   const handlePress = () => {
-    Vibration.vibrate(30)
-    onToggle()
-  }
+    Vibration.vibrate(30);
+    onToggle();
+  };
 
   const interpolatedColor = animValue.interpolate({
     inputRange: [0, 1],
     outputRange: [theme.accentB, theme.accentA],
-  })
+  });
 
   return (
     <Pressable onPress={handlePress}>
@@ -239,23 +241,23 @@ const RoleSwitcher: React.FC<RoleSwitcherProps> = React.memo(({ role, onToggle, 
         </Animated.View>
       </Animated.View>
     </Pressable>
-  )
-})
+  );
+});
 
 interface ActionCardProps {
-  title: string
-  subtitle: string
-  gradient: readonly [string, string]
-  onPress: () => void
-  delay?: number
-  theme: any
-  unreadCount?: number
+  title: string;
+  subtitle: string;
+  gradient: readonly [string, string];
+  onPress: () => void;
+  delay?: number;
+  theme: any;
+  unreadCount?: number;
 }
 
 const ActionCard: React.FC<ActionCardProps> = React.memo(({ title, subtitle, gradient, onPress, delay = 0, theme, unreadCount }) => {
-  const translateY = useRef(new Animated.Value(30)).current
-  const opacity = useRef(new Animated.Value(0)).current
-  const [isPressed, setIsPressed] = useState(false)
+  const translateY = useRef(new Animated.Value(30)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const [isPressed, setIsPressed] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -272,19 +274,19 @@ const ActionCard: React.FC<ActionCardProps> = React.memo(({ title, subtitle, gra
           friction: 8,
           tension: 120,
         }),
-      ]).start()
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [translateY, opacity, delay])
+      ]).start();
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [translateY, opacity, delay]);
 
   const handlePressIn = () => {
-    setIsPressed(true)
-    Vibration.vibrate(25)
-  }
+    setIsPressed(true);
+    Vibration.vibrate(25);
+  };
 
   const handlePressOut = () => {
-    setIsPressed(false)
-  }
+    setIsPressed(false);
+  };
 
   return (
     <Animated.View
@@ -316,16 +318,16 @@ const ActionCard: React.FC<ActionCardProps> = React.memo(({ title, subtitle, gra
         </LinearGradient>
       </Pressable>
     </Animated.View>
-  )
-})
+  );
+});
 
 interface BottomNavigationProps {
-  router: any
-  theme: any
+  router: any;
+  theme: any;
 }
 
 const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({ router, theme }) => {
-  const pathname = usePathname()
+  const pathname = usePathname();
   
   const navItems = [
     {
@@ -346,20 +348,20 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({ router, 
       icon: '⚙️',
       showPlus: false,
     },
-  ]
+  ];
 
   const getActiveIndex = () => {
-    if (pathname === '/chats') return 1
-    if (pathname === '/settings') return 2
-    return 0
-  }
+    if (pathname === '/chats') return 1;
+    if (pathname === '/settings') return 2;
+    return 0;
+  };
 
-  const activeIndex = getActiveIndex()
-  const indicatorPosition = useRef(new Animated.Value(0)).current
+  const activeIndex = getActiveIndex();
+  const indicatorPosition = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const tabWidth = width / navItems.length
-    const toValue = tabWidth * activeIndex + (tabWidth / 2) - 20
+    const tabWidth = width / navItems.length;
+    const toValue = tabWidth * activeIndex + (tabWidth / 2) - 20;
 
     Animated.spring(indicatorPosition, {
       toValue,
@@ -367,15 +369,15 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({ router, 
       friction: 8,
       tension: 150,
       velocity: 2,
-    }).start()
-  }, [activeIndex, indicatorPosition, navItems.length])
+    }).start();
+  }, [activeIndex, indicatorPosition, navItems.length]);
 
   const handleTabPress = (index: number, route: string | null) => {
-    Vibration.vibrate(20)
+    Vibration.vibrate(20);
     if (route && pathname !== route) {
-      router.push(route)
+      router.push(route);
     }
-  }
+  };
 
   return (
     <View
@@ -438,14 +440,14 @@ const BottomNavigation: React.FC<BottomNavigationProps> = React.memo(({ router, 
         </TouchableOpacity>
       ))}
     </View>
-  )
-})
+  );
+});
 
-const ChatbotPopup: React.FC<{ theme: any ;onClose: () => void }> = React.memo(({ theme, onClose }) => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([])
-  const [inputText, setInputText] = useState('')
-  const scrollViewRef = useRef<ScrollView>(null)
+const ChatbotPopup: React.FC<{ theme: any; onClose: () => void }> = React.memo(({ theme, onClose }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([]);
+  const [inputText, setInputText] = useState('');
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const suggestedQuestions = [
     {
@@ -468,41 +470,61 @@ const ChatbotPopup: React.FC<{ theme: any ;onClose: () => void }> = React.memo((
       question: 'How do I handle difficult clients?',
       answer: 'Stay professional and calm. Listen to their concerns and clarify misunderstandings politely. Set clear expectations upfront in your gig description and contracts. If issues persist, use the platform’s messaging system to document communication. Offer reasonable solutions, like revisions or partial refunds, and escalate to support if needed. Always maintain a positive tone to protect your reputation.',
     },
-  ]
+  ];
 
   const sendMessage = async (text: string) => {
-    if (!text.trim()) return
+    if (!text.trim()) return;
 
-    const userMessage = { text, isUser: true }
-    setMessages(prev => [...prev, userMessage])
-    setInputText('')
-    setIsLoading(true)
+    const userMessage = { text, isUser: true };
+    setMessages(prev => [...prev, userMessage]);
+    setInputText('');
+    setIsLoading(true);
 
     try {
-      const matchedQuestion = suggestedQuestions.find(q => q.question.toLowerCase() === text.toLowerCase())
+      const matchedQuestion = suggestedQuestions.find(q => q.question.toLowerCase() === text.toLowerCase());
       if (matchedQuestion) {
-        setMessages(prev => [...prev, { text: matchedQuestion.answer, isUser: false }])
-        setIsLoading(false)
-        return
+        setMessages(prev => [...prev, { text: matchedQuestion.answer, isUser: false }]);
+        setIsLoading(false);
+        return;
       }
 
-      // Use any AI for the question using groq api
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': ``, // Use your's I cannot provide mine
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: text }],
+          temperature: 0.7,
+        }),
+      });
+      const data = await response.json();
+      const botMessage = { text: data.choices?.[0]?.message?.content || "I'm powered by Groq, here to assist!", isUser: false };
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      setMessages(prev => [...prev, { text: "Sorry, I couldn't process that. Try again!", isUser: false }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSuggestedQuestion = (question: string) => {
-    setInputText(question)
-    sendMessage(question)
-    Vibration.vibrate(20)
-  }
+    setInputText(question);
+    sendMessage(question);
+    Vibration.vibrate(20);
+  };
 
   useEffect(() => {
-    scrollViewRef.current?.scrollToEnd({ animated: true })
-  }, [messages])
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
 
   const handleClose = useCallback(() => {
-    console.log('Close button pressed')
-    Vibration.vibrate(30)
-    onClose()
-  }, [onClose])
+    console.log('Close button pressed');
+    Vibration.vibrate(30);
+    onClose();
+  }, [onClose]);
 
   return (
     <Modal
@@ -567,7 +589,7 @@ const ChatbotPopup: React.FC<{ theme: any ;onClose: () => void }> = React.memo((
           </TouchableOpacity>
         </View>
 
-        {}
+        {/* Suggested Questions Section */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -683,33 +705,33 @@ const ChatbotPopup: React.FC<{ theme: any ;onClose: () => void }> = React.memo((
         </View>
       </View>
     </Modal>
-  )
-})
+  );
+});
 
 export default function Dashboard() {
-  const router = useRouter()
-  const { theme, actualTheme } = useTheme()
-  const { user, role, name, loading, setRole, logout } = usePersistedAuth()
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  const router = useRouter();
+  const { theme, actualTheme } = useTheme();
+  const { user, role, name, loading, setRole, logout } = usePersistedAuth();
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      StatusBar.setBarStyle(actualTheme === 'dark' ? 'light-content' : 'dark-content')
-      return () => {}
+      StatusBar.setBarStyle(actualTheme === 'dark' ? 'light-content' : 'dark-content');
+      return () => {};
     }, [actualTheme])
-  )
+  );
 
   useEffect(() => {
     if (user && !name && !loading) {
-      router.push('/editName')
+      router.push('/editName');
     }
-  }, [user, name, loading, router])
+  }, [user, name, loading, router]);
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/signin')
+      router.push('/signin');
     }
-  }, [user, loading, router])
+  }, [user, loading, router]);
 
   const sellerTips = React.useMemo(
     () => [
@@ -730,7 +752,7 @@ export default function Dashboard() {
       },
     ],
     [theme],
-  )
+  );
 
   const buyerTips = React.useMemo(
     () => [
@@ -751,39 +773,39 @@ export default function Dashboard() {
       },
     ],
     [theme],
-  )
+  );
 
   const handleSignOut = useCallback(async () => {
     try {
-      await logout()
-      router.replace('/signin')
+      await logout();
+      router.replace('/signin');
     } catch (error) {
-      console.error('Sign out error:', error)
+      console.error('Sign out error:', error);
     }
-  }, [logout, router])
+  }, [logout, router]);
 
   const toggleRole = useCallback(async () => {
     try {
-      const newRole = role === 'Buyer' ? 'Seller' : 'Buyer'
-      await setRole(newRole)
+      const newRole = role === 'Buyer' ? 'Seller' : 'Buyer';
+      await setRole(newRole);
     } catch (error) {
-      console.error('Toggle role error:', error)
+      console.error('Toggle role error:', error);
     }
-  }, [role, setRole])
+  }, [role, setRole]);
 
   const handleTipPress = useCallback((title: string) => {
-    Vibration.vibrate(15)
-  }, [])
+    Vibration.vibrate(15);
+  }, []);
 
   const toggleChat = useCallback(() => {
-    console.log('toggleChat called, current state:', isChatOpen)
+    console.log('toggleChat called, current state:', isChatOpen);
     setIsChatOpen(prev => {
-      const newState = !prev
-      console.log('Setting isChatOpen to:', newState)
-      return newState
-    })
-    Vibration.vibrate(20)
-  }, [isChatOpen])
+      const newState = !prev;
+      console.log('Setting isChatOpen to:', newState);
+      return newState;
+    });
+    Vibration.vibrate(20);
+  }, [isChatOpen]);
 
   if (loading) {
     return (
@@ -795,11 +817,11 @@ export default function Dashboard() {
           <Text style={[styles.loadingLabel, { color: theme.text }]}>Loading Dashboard...</Text>
         </View>
       </SafeAreaView>
-    )
+    );
   }
 
   if (!user) {
-    return null
+    return null;
   }
 
   return (
@@ -885,7 +907,7 @@ export default function Dashboard() {
       </SafeAreaView>
       {isChatOpen && <ChatbotPopup theme={theme} onClose={toggleChat} />}
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -1091,4 +1113,4 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '500',
   },
-})
+});
